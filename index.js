@@ -1,7 +1,9 @@
 var graphql = require('graphql');
 var graphqlHTTP = require('express-graphql');
 var express = require('express');
+var db = require('./db');
 
+var app = express();
 var data = require('./data.json');
 
 var userType = new graphql.GraphQLObjectType({
@@ -30,9 +32,23 @@ var schema = new graphql.GraphQLSchema({
   })
 });
 
+app.use('/graphql', graphqlHTTP({ schema: schema, pretty: true }))
 
-express()
-  .use('/graphql', graphqlHTTP({ schema: schema, pretty: true }))
-  .listen(4000);
+var url;
+if(process.env.NODE_ENV == 'production')
+    url = 'mongodb://' + process.env.DB_USER_NAME + ':'+ process.env.DB_PASSWORD + '@ds011251.mlab.com:11251/mallujunkies';
+else
+    url = 'mongodb://localhost:27017/mallunjunkies';
 
-console.log('GraphQL server running on http://localhost:3000/graphql');
+db.connect(url, function (err) {
+    if (err) {
+        console.log('Unable to connect to Mongo.')
+        process.exit(1)
+    } else {
+        console.log('Connected to Mongo server.')
+        var port = process.env.PORT || 4000;
+        app.listen(port, function () {
+            console.log('GraphQL server running on ' + port);
+        })
+    }
+});
