@@ -1,9 +1,7 @@
 var path = require("path");
 
 module.exports = {
-    entry: {
-        graphiql: "graphiql",
-    },
+    entry: path.join(__dirname, "graphiql/index.js"),
     output: {
         fileName: "[name].bundle.js",
         path: __dirname + "/graphiql/"
